@@ -1,0 +1,19 @@
+{
+  "name": "mcutomydrive",
+  "version": "1.0.0",
+  "description": "script to save mcu files to drive",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Chipskein",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "cli-colors": "^0.0.2",
+    "dotenv": "^16.0.1",
+    "google-auth-library": "^8.0.2",
+    "googleapis": "^100.0.0"
+  }
+}
