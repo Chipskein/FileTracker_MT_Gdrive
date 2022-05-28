@@ -25,6 +25,7 @@ Services.db.checkFilesTable();
 
 Services.logs.log(`Insert or Not Files from ${process.env.MCD_DIR} in Files Table`);
 Services.db.insertInFilesIfNotExists();
+
 Services.logs.log(`Verify GDRIVE ID in Files`);
 (async ()=>{await Services.db.VerifyAllWithOutGdriveId()})();
 

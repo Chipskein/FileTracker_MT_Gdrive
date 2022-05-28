@@ -1,6 +1,7 @@
 const fs=require('fs');
 const path=require('path');
 const hash=require('sha256');
+const LogService = require('./logservice');
 const defaultPath=`${path.resolve()}/src/tmp/`;
 
 const FileService={
@@ -9,9 +10,19 @@ const FileService={
         dotenv.config(envfile_name);
     },
     testEnvVariables:()=>{
-        const { CREDENTIALS_JSON, GDRIVE_FOLDER }=process.env
-        if(CREDENTIALS_JSON&&GDRIVE_FOLDER) return true;
-        else return false;
+        const { CREDENTIALS_JSON, GDRIVE_FOLDER ,MCD_DIR }=process.env
+        const os=process.platform;
+        if(CREDENTIALS_JSON && GDRIVE_FOLDER && MCD_DIR){
+            try{
+                test1=JSON.parse(CREDENTIALS_JSON);
+                test2=fs.existsSync(MCD_DIR)
+                return test1&&test2 ? true:false
+            }
+            catch (e){
+                LogService.error(e);
+                return false;
+            }
+        } else return false;
     },
     prepareGDRIVEVariables:()=>{
         FileService.createFile('tmpcredentials.json',process.env.CREDENTIALS_JSON)
