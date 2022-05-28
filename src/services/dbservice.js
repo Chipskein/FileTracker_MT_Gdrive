@@ -12,7 +12,6 @@ const DBService={
         db.get('SELECT 1+2 as test',[],(err,result)=>{
             if(err){
                 LogService.error('Test Database'+err)
-                process.exit();
             } else{
                 if(result.test==3) LogService.success('Test Database');
             }

@@ -15,7 +15,6 @@ const GdriveService={
     handlerTestCallback:(err,data)=>{
         if(err){
             LogService.error('Test GDRIVE Connection')
-            process.exit();
         } else {
             LogService.success('Test GDRIVE Connection')
         };
