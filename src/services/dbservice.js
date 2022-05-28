@@ -76,7 +76,6 @@ const DBService={
         const sql=`SELECT * FROM files f where f.gdrive_id is null;`;
         db.all(sql,[],async (err,result)=>{
             if(err){
-                console.log(err);
                 LogService.error(`VerifyAllWithOutGdriveId`);
             } else{
                 if(result.length>0){
@@ -95,7 +94,6 @@ const DBService={
         })
     },
     updateGdriveId:(file)=>{
-        console.log(file)
         db.run(`UPDATE files SET gdrive_id = ? WHERE id = ?`,[file.gdrive_id,file.id],(result,err)=>{
             if(err){
                 LogService.error('updateGdriveId,'+err);

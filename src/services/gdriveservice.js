@@ -49,8 +49,6 @@ const GdriveService={
                 files.map((file) => {
                     array.push(file);
                 });
-            } else {
-                console.log('No files found.');
             }
             callback(err,array);
         });
