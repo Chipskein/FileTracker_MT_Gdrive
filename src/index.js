@@ -19,7 +19,12 @@ Services.logs.log('Test ReadFiles');
 Services.logs.log('Test Gdrive Connection');
 (async ()=>{ await Services.gdrive.testConnection();})();
 
+Services.logs.log('Test Database');
+Services.db.testDatabaseConnection();
 
+
+Services.logs.log('Test Files Table in database');
+Services.db.checkFilesTable();
 
 
 
