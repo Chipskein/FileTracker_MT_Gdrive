@@ -6,7 +6,7 @@ const LogService = require('./logservice');
 const GdriveService=require('./gdriveservice');
 
 const DATABASE_PATH=`${path.resolve()}/src/database/data.db`;
-const db=new sqlite3.Database(DATABASE_PATH);
+const db=new sqlite3.Database(DATABASE_PATH,sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
 const DBService={
     testDatabaseConnection:()=>{
         db.get('SELECT 1+2 as test',[],(err,result)=>{
