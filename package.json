@@ -1,16 +1,15 @@
 {
-  "name": "mcutomydrive",
+  "name": "mcd.to.gdrive",
   "version": "1.0.0",
-  "description": "script to save mcu files to drive",
+  "description": "script to save mcd files to gdrive",
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "test": "nodemon --ignore ./src/tmp/ src/index.js"
+    "dev": "nodemon --ignore ./src/tmp/ src/index.js"
   },
   "author": "Chipskein",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.27.2",
     "cli-colors": "^0.0.2",
     "dotenv": "^16.0.1",
     "googleapis": "^100.0.0",
