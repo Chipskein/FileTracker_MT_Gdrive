@@ -99,6 +99,25 @@ const DBService={
                 LogService.error('updateGdriveId,'+err);
             }
         })
-    }
+    },
+    CompareMtimeWithFileTable:()=>{
+        const sql=`SELECT * FROM files f where id= ?`;
+        const realFiles=FileService.readAllFromMCD_DIR();
+        for(let realfile of realFiles){
+            let id=realfile.id;
+            let mtime=new Date(realfile.updated_at).toISOString();
+            db.get(sql,[id],(err,result)=>{
+                if(err){
+
+                } else{
+                    let FileTableMtime=new Date(result.updated_at).toISOString();
+                    if(FileTableMtime!=mtime){
+                        FileService.SyncFile({id:result.id,gdrive_id:result.gdrive_id});
+                        LogService.warning(`File ${result.id} need be updated on gdrive`);
+                    }
+                }
+            });
+        }        
+    },
 }
 module.exports=DBService

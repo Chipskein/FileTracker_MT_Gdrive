@@ -68,6 +68,14 @@ const FileService={
             response.push({id,name: filename, extension,description,filesize,updated_at,filepath});
         }
         return response;
+    },
+    SyncFile:(file)=>{
+        console.log(file);
+        //download file from drive to src/tmp
+        //then compare hash of file in MCU with src/tmp
+        // if differ update file in drive
+        //update (gdrive_id) ?  updated_at to the same at real file
+        //delete file in tmp
     }
 }
 module.exports=FileService
