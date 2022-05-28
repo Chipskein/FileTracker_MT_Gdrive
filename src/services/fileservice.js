@@ -28,6 +28,9 @@ const FileService={
         const fileContent=FileService.readFile(path.resolve()+'/src/tmp/.gitkeep');
         return (fileContent=='temp dir') ? true:false; 
     },
+    createWriteStream:(filename)=>{
+        return fs.createWriteStream(defaultPath+filename);
+    },
     createReadStreamFromFile:(path)=>{
         return fs.createReadStream(path);
     },

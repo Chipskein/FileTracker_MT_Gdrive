@@ -3,7 +3,6 @@ const path=require('path');
 
 const KEY_PATH=`${path.resolve()}/src/tmp/tmpcredentials.json`;
 const SCOPES = ['https://www.googleapis.com/auth/drive'];
-const FOLDER= process.env.GDRIVE_FOLDER;
 const auth = new google.auth.GoogleAuth({keyFilename: KEY_PATH,scopes: SCOPES});
 
 const LogService=require('./logservice');
@@ -11,7 +10,7 @@ const FileService=require('./fileservice');
 
 const GdriveService={
     testConnection:async ()=>{
-        GdriveService.listFiles(GdriveService.handlerTestCallback);
+        await GdriveService.listFiles(GdriveService.handlerTestCallback);
     },
     handlerTestCallback:(err,data)=>{
         if(err){
@@ -23,7 +22,7 @@ const GdriveService={
     },
     createAndUploadFile:async (fileName,filePath,callback)=>{
         const driveService = google.drive({version: 'v3', auth});
-
+        const FOLDER= process.env.GDRIVE_FOLDER;
         let fileMetaData = {'name': fileName,'parents': [FOLDER]}
         let media = {mimeType: "*/*",body: FileService.createReadStreamFromFile(filePath)}
         
@@ -42,7 +41,8 @@ const GdriveService={
     listFiles:async (callback)=>{
         const array = [];
         const drive = google.drive({ version: 'v3', auth });
-        drive.files.list({fields: 'nextPageToken, files(id, name)',}, (err, res) => {
+        const FOLDER= process.env.GDRIVE_FOLDER;
+        drive.files.list({fields: 'nextPageToken, files(id, name)',q: `'${FOLDER}' in parents and trashed=false`}, (err, res) => {
             if (err) return console.log('The API returned an error: ' + err);
             const files = res.data.files;
             if (files.length) {
@@ -54,6 +54,24 @@ const GdriveService={
             }
             callback(err,array);
         });
+    },
+    downloadFile:(fileId,filename)=>{
+        const dest = FileService.createWriteStream(filename);
+        const drive = google.drive({version: 'v3', auth});
+        drive.files.get({fileId: fileId, alt: "media"},{responseType: "stream"},(err,{data}) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            data
+            .on("end", () => console.log("Done."))
+            .on("error", (err) => {
+                console.log(err);
+                return process.exit();
+            })
+            .pipe(dest);
+        }
+        );
     },
     deleteFile:async (id)=>{
         const drive = google.drive({version: 'v3', auth});
