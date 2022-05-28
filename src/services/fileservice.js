@@ -1,9 +1,7 @@
 const fs=require('fs');
 const path=require('path');
-
+const hash=require('sha256');
 const defaultPath=`${path.resolve()}/src/tmp/`;
-
-const DIRS_TO_BACKUP=[];
 
 const FileService={
     loadEnviroment:(envfile_name='.env')=>{
@@ -41,5 +39,19 @@ const FileService={
         if(exists) fs.unlinkSync(path);
         return exists
     },
+    readAllFromMCD_DIR:()=>{
+        const MCD_DIR=process.env.MCD_DIR;
+        const files=fs.readdirSync(MCD_DIR);
+        const response=[];
+        for (let filename of files) {
+            const extension = path.extname(MCD_DIR+filename);
+            const stats=fs.statSync(MCD_DIR+filename);
+            const lastUpdate=stats.mtime;
+            const fileSizeInBytes = stats.size;
+            const id=hash(filename)
+            response.push({id,name: filename, extension, fileSizeInBytes ,lastUpdate});
+        }
+        return response;
+    }
 }
 module.exports=FileService

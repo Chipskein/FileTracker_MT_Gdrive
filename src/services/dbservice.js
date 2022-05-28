@@ -18,10 +18,12 @@ const DBService={
     checkFilesTable:()=>{
         const sql=`
             CREATE TABLE files (
-                id TEXT(64),
+                id TEXT(64) NOT NULL,
                 name TEXT(80) NOT NULL,
                 description TEXT(100) NOT NULL,
-                updated_at DATETIME
+                updated_at DATETIME,
+                gdrive_id TEXT(64),
+                PRIMARY KEY(id)
             );
         `;
         db.get('SELECT name FROM sqlite_master WHERE type= ? AND name= ? ',['table','files'],(err,result)=>{

@@ -15,7 +15,6 @@ Services.logs.log('Prepare GDRIVE Variables');
 Services.logs.log('Test ReadFiles');
 (!Services.file.testReadFile()) ? Services.logs.error('Test Enviroment'):Services.logs.success('Test ReadFiles');
 
-//Test Google Drive
 Services.logs.log('Test Gdrive Connection');
 (async ()=>{ await Services.gdrive.testConnection();})();
 
@@ -25,6 +24,7 @@ Services.db.testDatabaseConnection();
 
 Services.logs.log('Test Files Table in database');
 Services.db.checkFilesTable();
+
 
 
 
