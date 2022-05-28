@@ -49,10 +49,12 @@ const FileService={
         for (let filename of files) {
             const extension = path.extname(MCD_DIR+filename);
             const stats=fs.statSync(MCD_DIR+filename);
-            const lastUpdate=stats.mtime;
-            const fileSizeInBytes = stats.size;
-            const id=hash(filename)
-            response.push({id,name: filename, extension, fileSizeInBytes ,lastUpdate});
+            const updated_at=stats.mtime;
+            const filesize = stats.size;
+            const id=hash(filename);
+            const description='duckstation memory card file'
+            const filepath=MCD_DIR+filename;
+            response.push({id,name: filename, extension,description,filesize,updated_at,filepath});
         }
         return response;
     }

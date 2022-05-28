@@ -1,6 +1,10 @@
 const sqlite3 = require('sqlite3').verbose();
 const path=require('path');
+
+const FileService = require('./fileservice');
 const LogService = require('./logservice');
+const GdriveService=require('./gdriveservice');
+
 const DATABASE_PATH=`${path.resolve()}/src/database/data.db`;
 const db=new sqlite3.Database(DATABASE_PATH);
 const DBService={
@@ -21,7 +25,9 @@ const DBService={
                 id TEXT(64) NOT NULL,
                 name TEXT(80) NOT NULL,
                 description TEXT(100) NOT NULL,
-                updated_at DATETIME,
+                extension TEXT NOT NULL,
+                updated_at DATETIME NOT NULL,
+                path TEXT NOT NULL,
                 gdrive_id TEXT(64),
                 PRIMARY KEY(id)
             );
@@ -44,15 +50,57 @@ const DBService={
         })
 
     },
-    getFilesSummaryById:(hashid)=>{
+    getFilesSummaryById:(hashid,callback)=>{
         db.get('SELECT * FROM files WHERE id= ? ',[hashid],(err,result)=>{
             if(err){
-                console.log(err);
+                LogService.error(`getFilesSummaryById FAIL::${err}`);
             } else{
-                console.log(result);
+                if(result) callback(result);
+                else LogService.warning(`${hashid} not found in files table`);
             };
         })
-        db.close();
+    },
+    insertInFilesIfNotExists:()=>{
+        db.serialize(()=>{
+            db.run("begin transaction");
+            const files=FileService.readAllFromMCD_DIR();
+            const Prepquery=db.prepare('INSERT OR IGNORE INTO files(id,name,description,extension,updated_at,path) VALUES (?,?,?,?,?,?)');
+            for(let file of files){
+                Prepquery.run(file.id,file.name,file.description,file.extension,file.updated_at,file.filepath);
+            };
+            Prepquery.finalize();
+            db.run("commit");
+        })
+    },
+    VerifyAllWithOutGdriveId:async ()=>{
+        const sql=`SELECT * FROM files f where f.gdrive_id is null;`;
+        db.all(sql,[],async (err,result)=>{
+            if(err){
+                console.log(err);
+                LogService.error(`VerifyAllWithOutGdriveId`);
+            } else{
+                if(result.length>0){
+                    for(let file of result){
+                        await GdriveService.createAndUploadFile(file.name,file.path,(err,fileId)=>{
+                            if(err){
+                                LogService.error(`VerifyAllWithOutGdriveId`);
+                            } else{
+                                DBService.updateGdriveId({id:file.id,gdrive_id:fileId});
+                            }
+                        })
+                    }
+                }
+                LogService.success(`Verify GDRIVE ID in Files`);
+            }
+        })
+    },
+    updateGdriveId:(file)=>{
+        console.log(file)
+        db.run(`UPDATE files SET gdrive_id = ? WHERE id = ?`,[file.gdrive_id,file.id],(result,err)=>{
+            if(err){
+                LogService.error('updateGdriveId,'+err);
+            }
+        })
     }
 }
 module.exports=DBService
