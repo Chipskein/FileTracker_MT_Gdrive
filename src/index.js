@@ -1,6 +1,7 @@
 const Services =require('./services/services.js');
 
-Services.logs.log('Starting Program');
+console.clear();
+Services.logs.warning('Starting Program');
 
 Services.logs.log('Loading Enviroment');
 Services.file.loadEnviroment();
@@ -32,7 +33,6 @@ Services.logs.log(`Verify GDRIVE ID in Files`);
 
 
 
-//Services.logs.success('End script :)');
 //process.exit();
 
 
