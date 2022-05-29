@@ -34,5 +34,8 @@ Services.logs.log(`Comparing mtime of file with file table last update`);
 Services.db.CompareMtimeWithFileTable();
 
 
-
-
+/*
+Services.logs.warning('Cleaning tmp/ dir');
+Services.file.clearTMP();
+Services.logs.success('Ending Program');
+*/

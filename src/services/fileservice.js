@@ -109,6 +109,14 @@ const FileService={
             //are equal
             return true;
         }
+    },
+    clearTMP:()=>{
+        const tmp_files=fs.readdirSync(defaultPath);
+        for (filename of tmp_files){
+            if(filename!='.gitkeep'){
+                fs.unlinkSync(defaultPath+filename);
+            }
+        }
     }
 }
 module.exports=FileService
