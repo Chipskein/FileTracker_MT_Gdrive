@@ -61,7 +61,7 @@ const GdriveService={
                 return;
             }
             data
-            .on("end", () => console.log("Done."))
+            .on("end", () => console.log("Download Done."))
             .on("error", (err) => {
                 console.log(err);
                 return process.exit();

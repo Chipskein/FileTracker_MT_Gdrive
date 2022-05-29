@@ -1,6 +1,7 @@
 const fs=require('fs');
 const path=require('path');
 const hash=require('sha256');
+
 const LogService = require('./logservice');
 const defaultPath=`${path.resolve()}/src/tmp/`;
 
@@ -29,6 +30,10 @@ const FileService={
         contentFromCreatedFile=FileService.readFile(defaultPath+'tmpcredentials.json');
         if(contentFromCreatedFile==process.env.CREDENTIALS_JSON) return true;
         else false;
+    },
+    readFileBuffer:(filepath)=>{
+        const fileBuffer=fs.readFileSync(filepath);
+        return fileBuffer;
     },
     readFile:(filepath)=>{
         const fileBuffer=fs.readFileSync(filepath);
@@ -69,13 +74,41 @@ const FileService={
         }
         return response;
     },
-    SyncFile:(file)=>{
-        console.log(file);
-        //download file from drive to src/tmp
-        //then compare hash of file in MCU with src/tmp
-        // if differ update file in drive
-        //update (gdrive_id) ?  updated_at to the same at real file
-        //delete file in tmp
+    verifyIfFileExists:(fileId)=>{
+        return fs.existsSync(defaultPath+fileId);
+    },
+    SyncFile:(fileId,realFileName)=>{
+        
+        let GdriveFilePath=defaultPath+fileId;
+        let RealFilePath=process.env.MCD_DIR+realFileName;
+        let GdriveFile_EQ_RealFile=FileService.CompareFilesBufferByPath(GdriveFilePath,RealFilePath)
+        if(!GdriveFile_EQ_RealFile){
+            //do something
+             // if differ update file in drive
+            //update (gdrive_id) ?  updated_at to the same at real file
+            //delete file in tmp
+        }
+        else{
+            LogService.warning(`${fileId} has the same content that Gdrive file but dates differ`)
+        }
+       
+    },
+    CompareFilesBufferByPath:(path1,path2)=>{
+        //return true if files are equal e false if not
+        const bufferOfGdriveFile=FileService.readFileBuffer(path1);
+        const bufferOfRealFile=FileService.readFileBuffer(path2);
+        //compare buffer size of both files if differ differ file
+        if(bufferOfRealFile.length!=bufferOfGdriveFile.length) return false;
+        else{
+            const buffer_size=bufferOfRealFile.length
+            for(let c=0;c<buffer_size;c++){
+                byte1=bufferOfGdriveFile[c];
+                byte2=bufferOfGdriveFile[c];
+                if(byte1!=byte2) return false;
+            }
+            //are equal
+            return true;
+        }
     }
 }
 module.exports=FileService
