@@ -30,7 +30,6 @@ Services.db.insertInFilesIfNotExists();
 Services.logs.log(`Verify GDRIVE ID in Files`);
 (async ()=>{await Services.db.VerifyAllWithOutGdriveId()})();
 
-
 Services.logs.log(`Comparing mtime of file with file table last update`);
 Services.db.CompareMtimeWithFileTable();
 

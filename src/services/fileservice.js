@@ -2,6 +2,7 @@ const fs=require('fs');
 const path=require('path');
 const hash=require('sha256');
 
+
 const LogService = require('./logservice');
 
 const defaultPath=`${path.resolve()}/src/tmp/`;
@@ -78,17 +79,18 @@ const FileService={
     verifyIfFileExists:(fileId)=>{
         return fs.existsSync(defaultPath+fileId);
     },
-    SyncFile:(fileId,realFileName)=>{
+    verifySyncFile:(fileId,realFileName)=>{
         
         let GdriveFilePath=defaultPath+fileId;
         let RealFilePath=process.env.MCD_DIR+realFileName;
         let GdriveFile_EQ_RealFile=FileService.CompareFilesBufferByPath(GdriveFilePath,RealFilePath)
+        //
         if(!GdriveFile_EQ_RealFile){
-            // if differ update file in drive
-            // reupload or update (gdrive_id) ?  updated_at to the same at real file
+            return false;
         }
         else{
             LogService.warning(`${fileId} has the same content that Gdrive file but dates differ`)
+            return true;
         }
     },
     CompareFilesBufferByPath:(path1,path2)=>{

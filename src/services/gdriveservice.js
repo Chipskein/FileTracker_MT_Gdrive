@@ -72,9 +72,7 @@ const GdriveService={
     },
     deleteFile:async (id)=>{
         const drive = google.drive({version: 'v3', auth});
-        drive.files.delete({
-            fileId: id,
-        });
+        drive.files.delete({fileId: id,});
     }
 };
 

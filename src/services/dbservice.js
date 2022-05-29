@@ -7,6 +7,7 @@ const GdriveService=require('./gdriveservice');
 
 const DATABASE_PATH=`${path.resolve()}/src/database/data.db`;
 const db=new sqlite3.Database(DATABASE_PATH,sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
+
 const DBService={
     testDatabaseConnection:()=>{
         db.get('SELECT 1+2 as test',[],(err,result)=>{
@@ -99,13 +100,20 @@ const DBService={
             }
         })
     },
+    updateMtime:(id,mtime)=>{
+        db.run(`UPDATE files SET updated_at = ? WHERE id = ?`,[mtime,id],(result,err)=>{
+            if(err){
+                LogService.error('updateMtime,'+err);
+            }
+        })
+    },
     CompareMtimeWithFileTable:()=>{
         const sql=`SELECT * FROM files f where id= ?`;
         const realFiles=FileService.readAllFromMCD_DIR();
         for(let realfile of realFiles){
             let id=realfile.id;
             let mtime=new Date(realfile.updated_at).toISOString();
-            db.get(sql,[id],(err,result)=>{
+            db.get(sql,[id],async (err,result)=>{
                 if(err){
 
                 } else{
@@ -113,9 +121,20 @@ const DBService={
                     if(FileTableMtime!=mtime){
                         GdriveService.downloadFile(result.gdrive_id,result.id);
                         if(FileService.verifyIfFileExists(result.id)){
-                            FileService.SyncFile(result.id,result.name);
+                            let Sync=FileService.verifySyncFile(result.id,result.name);
+                            if(!Sync){
+                                await GdriveService.createAndUploadFile(result.name,result.path,(err,fileId)=>{
+                                    if(err){
+                                        LogService.error(`CompareMtimeWithFileTable`);
+                                    } else{
+                                        DBService.updateGdriveId({id:result.id,gdrive_id:fileId});
+                                        DBService.updateMtime(result.id,mtime);
+                                    }
+                                })
+                                await GdriveService.deleteFile(result.gdrive_id);
+                            }
+                        
                         }
-                        LogService.warning(`File ${result.id} need be updated on gdrive`);
                     }
                 }
             });
