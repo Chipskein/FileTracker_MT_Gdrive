@@ -112,7 +112,9 @@ const DBService={
                     let FileTableMtime=new Date(result.updated_at).toISOString();
                     if(FileTableMtime!=mtime){
                         GdriveService.downloadFile(result.gdrive_id,result.id);
-                        if(FileService.verifyIfFileExists(result.id)) FileService.SyncFile(result.id,result.name);
+                        if(FileService.verifyIfFileExists(result.id)){
+                            FileService.SyncFile(result.id,result.name);
+                        }
                         LogService.warning(`File ${result.id} need be updated on gdrive`);
                     }
                 }

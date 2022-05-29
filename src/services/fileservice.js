@@ -3,6 +3,7 @@ const path=require('path');
 const hash=require('sha256');
 
 const LogService = require('./logservice');
+
 const defaultPath=`${path.resolve()}/src/tmp/`;
 
 const FileService={
@@ -12,7 +13,6 @@ const FileService={
     },
     testEnvVariables:()=>{
         const { CREDENTIALS_JSON, GDRIVE_FOLDER ,MCD_DIR }=process.env
-        const os=process.platform;
         if(CREDENTIALS_JSON && GDRIVE_FOLDER && MCD_DIR){
             try{
                 test1=JSON.parse(CREDENTIALS_JSON);
@@ -53,7 +53,8 @@ const FileService={
     createFile:(filename,content)=>{
         fs.writeFileSync(defaultPath+filename,content)
     },
-    deleteFile:(path)=>{
+    deleteFile:(filename)=>{
+        const path=defaultPath+filename;
         const exists=fs.existsSync(path)
         if(exists) fs.unlinkSync(path);
         return exists
@@ -83,15 +84,12 @@ const FileService={
         let RealFilePath=process.env.MCD_DIR+realFileName;
         let GdriveFile_EQ_RealFile=FileService.CompareFilesBufferByPath(GdriveFilePath,RealFilePath)
         if(!GdriveFile_EQ_RealFile){
-            //do something
-             // if differ update file in drive
-            //update (gdrive_id) ?  updated_at to the same at real file
-            //delete file in tmp
+            // if differ update file in drive
+            // reupload or update (gdrive_id) ?  updated_at to the same at real file
         }
         else{
             LogService.warning(`${fileId} has the same content that Gdrive file but dates differ`)
         }
-       
     },
     CompareFilesBufferByPath:(path1,path2)=>{
         //return true if files are equal e false if not
