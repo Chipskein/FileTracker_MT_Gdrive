@@ -1,4 +1,2 @@
-refactor []
 implement automated tests []
-create bash script to configure crontab(run each time system starts) []
-verify if has internet if not,stand by until has connection []
+create bash script to configure installation []
