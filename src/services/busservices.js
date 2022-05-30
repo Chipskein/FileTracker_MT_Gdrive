@@ -2,18 +2,13 @@ const LogService = require("./logservice")
 const GdriveService = require("./gdriveservice");
 const FileService = require("./fileservice")
 const DBService = require("./dbservice")
+const TestService=require('./testservices');
 class BusServices{
     async start(){
 
         LogService.warning('Starting Program');
-        
         await this.prepareEnv();
-
-        await this.testEnv();
-        await this.testFilesService();
-        await this.testGdriveService();
-        await this.testDatabaseService();
-
+        await this.runTests();
         await this.TrackNewFiles();
         await this.uploadNewFiles();
         const files_Mtime_has_Change=await this.checkMtime()
@@ -23,40 +18,12 @@ class BusServices{
             LogService.warning(`${filesUpdated.length} files Updated !`);
         } else{
             LogService.warning('There is no change in Files');
-        }
-
+        }        
     }
     async prepareEnv(){
         const FS=new FileService();
         LogService.log('Loading Enviroment');
         await FS.loadEnviroment();
-    }
-    async testEnv(){
-        const FS=new FileService();
-        LogService.log('Test Enviroment');
-        (!FS.testEnvVariables()) ? LogService.error('Test Enviroment'):LogService.success('Test Enviroment');
-    }
-    async testFilesService(){
-        const FS=new FileService();
-        LogService.log('Test ReadFiles');
-        (!FS.testReadFile()) ? LogService.error('Test ReadFiles'):LogService.success('Test ReadFiles');
-    }
-    async testGdriveService(){
-        const FS=new FileService();
-        const GDS=new GdriveService()
-
-        LogService.log('Prepare GDRIVE Variables');
-        (!FS.prepareGDRIVEVariables()) ? LogService.error('Prepare GDRIVE Variables'):LogService.success('Prepare GDRIVE Variables');
-
-        LogService.log('Test Gdrive Connection');
-        await GDS.testConnection();
-    }
-    async testDatabaseService(){
-        const DBS=new DBService();
-        LogService.log('Test Database');
-        await DBS.testDatabaseConnection();
-        LogService.log('Test Files Table in database');
-        await DBS.checkFilesTable();
     }
     async TrackNewFiles(){
         const FS=new FileService();
@@ -109,6 +76,13 @@ class BusServices{
             }
         }
         return {files_mtime_corruped,filesUpdated}
+    }
+    async runTests(){
+        const TS=new TestService();
+        await TS.testEnv();
+        await TS.testFilesService();
+        await TS.testGdriveService();
+        await TS.testDatabaseService();
     }
 }
 module.exports=BusServices
