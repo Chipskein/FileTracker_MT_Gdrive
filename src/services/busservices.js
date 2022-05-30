@@ -4,9 +4,7 @@ const FileService = require("./fileservice")
 const DBService = require("./dbservice")
 const TestService=require('./testservices');
 const NetworkServices = require("./networkservice");
-function killProcess() {
-    running = false;
-}
+
 class BusServices{
     async start(){
         LogService.warning('Starting Program');
