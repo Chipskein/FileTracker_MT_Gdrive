@@ -3,10 +3,16 @@ const GdriveService = require("./gdriveservice");
 const FileService = require("./fileservice")
 const DBService = require("./dbservice")
 const TestService=require('./testservices');
+const NetworkServices = require("./networkservice");
+function killProcess() {
+    running = false;
+}
 class BusServices{
     async start(){
-
         LogService.warning('Starting Program');
+
+    
+        await this.awaitForConnection();    
         await this.prepareEnv();
         await this.runTests();
 
@@ -94,6 +100,15 @@ class BusServices{
         await this.prepareShutdown();
         LogService.warning('Shutdown Programm');
         process.exit();
+    }
+    async awaitForConnection(){
+        const NS=new NetworkServices();
+        let isOnline=await NS.isOnline();
+        while(!isOnline){
+            LogService.warning("Trying to connect to internet...");
+            isOnline=await NS.isOnline();
+        }
+        LogService.success("Trying to connect to internet");
     }
 }
 module.exports=BusServices
