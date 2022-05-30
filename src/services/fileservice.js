@@ -75,25 +75,6 @@ class FileService{
     verifyIfFileExists(fileId){
         return fs.existsSync(defaultPath+fileId);
     }
-    async SyncFile(fileId,realFileName,gdrive_id,mtime){
-        const Gdriver=new GdriveService()
-        await Gdriver.downloadFile(gdrive_id,fileId);
-        let GdriveFilePath=defaultPath+fileId;
-        let RealFilePath=process.env.MCD_DIR+realFileName;
-        let GdriveFile_EQ_RealFile=this.CompareFilesBufferByPath(GdriveFilePath,RealFilePath)
-        if(!GdriveFile_EQ_RealFile){
-            /*
-                const { id } = await Gdriver.createAndUploadFile(realFileName,RealFilePath)
-                await DBER.updateGdriveId({id:fileId,gdrive_id:id});
-                await DBER.updateMtime(fileId,mtime);
-                await Gdriver.deleteFile(gdrive_id);
-                Logger.success(fileId+"mtime fixed");
-            */
-        }
-        else{
-            Logger.warning('They are the same file but mtime has been changed');
-        }
-    }
     CompareFilesBufferByPath(path1,path2){
         const bufferOfGdriveFile=this.readFileBuffer(path1);
         const bufferOfRealFile=this.readFileBuffer(path2);
@@ -110,7 +91,7 @@ class FileService{
     }
     clearTMP(){
         const tmp_files=fs.readdirSync(defaultPath);
-        for (filename of tmp_files){
+        for (let filename of tmp_files){
             if(filename!='.gitkeep'){
                 fs.unlinkSync(defaultPath+filename);
             }

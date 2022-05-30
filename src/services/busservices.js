@@ -9,6 +9,7 @@ class BusServices{
         LogService.warning('Starting Program');
         await this.prepareEnv();
         await this.runTests();
+
         await this.TrackNewFiles();
         await this.uploadNewFiles();
         const files_Mtime_has_Change=await this.checkMtime()
@@ -19,6 +20,7 @@ class BusServices{
         } else{
             LogService.warning('There is no change in Files');
         }        
+        await this.shutdown();
     }
     async prepareEnv(){
         const FS=new FileService();
@@ -26,10 +28,10 @@ class BusServices{
         await FS.loadEnviroment();
     }
     async TrackNewFiles(){
+        LogService.log(`Track files from ${process.env.MCD_DIR}`);
         const FS=new FileService();
         const DBS=new DBService();
         const files=FS.readAllFromMCD_DIR()
-        LogService.log(`Track files from ${process.env.MCD_DIR}`);
         await DBS.insertInFilesIfNotExists(files);
     }
     async uploadNewFiles(){
@@ -83,6 +85,15 @@ class BusServices{
         await TS.testFilesService();
         await TS.testGdriveService();
         await TS.testDatabaseService();
+    }
+    async prepareShutdown(){
+        const FS=new FileService();
+        FS.clearTMP();
+    }
+    async shutdown(){
+        await this.prepareShutdown();
+        LogService.warning('Shutdown Programm');
+        process.exit();
     }
 }
 module.exports=BusServices
