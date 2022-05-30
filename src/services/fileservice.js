@@ -4,6 +4,13 @@ const hash=require('sha256');
 
 const defaultPath=`${path.resolve()}/src/tmp/`;
 
+const GdriveService=require('./gdriveservice');
+const LogService = require('./logservice');
+const DBService = require('./dbservice');
+
+const Logger=new LogService();
+const DBER=new DBService();
+
 class FileService{
     async loadEnviroment(envfile_name='.env'){
         const dotenv=require('dotenv');
@@ -75,24 +82,26 @@ class FileService{
     verifyIfFileExists(fileId){
         return fs.existsSync(defaultPath+fileId);
     }
-    verifySyncFile(fileId,realFileName){
-        
+    async SyncFile(fileId,realFileName,gdrive_id,mtime){
+        const Gdriver=new GdriveService()
+        await Gdriver.downloadFile(gdrive_id,fileId);
         let GdriveFilePath=defaultPath+fileId;
         let RealFilePath=process.env.MCD_DIR+realFileName;
         let GdriveFile_EQ_RealFile=this.CompareFilesBufferByPath(GdriveFilePath,RealFilePath)
-        //
         if(!GdriveFile_EQ_RealFile){
-            return false;
+            const { id } = await Gdriver.createAndUploadFile(realFileName,RealFilePath)
+            await DBER.updateGdriveId({id:fileId,gdrive_id:id});
+            await DBER.updateMtime(fileId,mtime);
+            await Gdriver.deleteFile(gdrive_id);
+            Logger.success(fileId+"mtime fixed");
         }
         else{
-            return true;
+            Logger.warning('They are the same file but mtime has been changed');
         }
     }
     CompareFilesBufferByPath(path1,path2){
-        //return true if files are equal e false if not
         const bufferOfGdriveFile=this.readFileBuffer(path1);
-        const bufferOfRealFile=FileService.readFileBuffer(path2);
-        //compare buffer size of both files if differ differ file
+        const bufferOfRealFile=this.readFileBuffer(path2);
         if(bufferOfRealFile.length!=bufferOfGdriveFile.length) return false;
         else{
             const buffer_size=bufferOfRealFile.length
@@ -101,7 +110,6 @@ class FileService{
                 byte2=bufferOfGdriveFile[c];
                 if(byte1!=byte2) return false;
             }
-            //are equal
             return true;
         }
     }

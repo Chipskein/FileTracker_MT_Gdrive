@@ -2,7 +2,7 @@ const { google }=require("googleapis");
 const path=require('path');
 
 const LogService=require('./logservice');
-const FileService=require('./fileservice');
+const Logger=new LogService();
 
 class GdriveService{
     constructor(){
@@ -31,10 +31,11 @@ class GdriveService{
         return files;
     }
     async downloadFile(fileId,filename){
-        const dest = FileService.createWriteStream(filename);
+        Logger.warning(`Downloading${filename}`);
+        const dest = Filer.createWriteStream(filename);
         const drive = google.drive({version: 'v3', auth:this.auth});
-        const response=await drive.files.get({fileId: fileId, alt: "media"},{responseType: "stream"})
-        console.log(response);
+        const { data }=await drive.files.get({fileId: fileId, alt: "media"},{responseType: "stream"})        
+        data.pipe(dest);
     }
     async deleteFile(id){
         const drive = google.drive({version: 'v3', auth:this.auth});

@@ -3,13 +3,10 @@ const sqlite=require('sqlite');
 const path=require('path');
 
 const GdriveService=require('./gdriveservice');
-
 const FileService = require('./fileservice');
 const LogService = require('./logservice');
 
-const Gdriver=new GdriveService()
 const Logger=new LogService();
-const Filer=new FileService();
 
 class DBService{
     constructor(){
@@ -72,7 +69,7 @@ class DBService{
         const db=await this.createConnection();
         try{
             await db.run("begin transaction");
-            const files=Filer.readAllFromMCD_DIR();
+            const files=FileService.readAllFromMCD_DIR();
             const Prepquery=await db.prepare('INSERT OR IGNORE INTO files(id,name,description,extension,updated_at,path) VALUES (?,?,?,?,?,?)');
             for(let file of files){
                 await Prepquery.run(file.id,file.name,file.description,file.extension,file.updated_at,file.filepath);
@@ -92,6 +89,7 @@ class DBService{
         try{
             const sql=`SELECT * FROM files f where f.gdrive_id is null;`;
             const result=await db.all(sql)
+            const Gdriver=new GdriveService()
             if(result.length>0){
                 for(let file of result){
                     const { id }=await Gdriver.createAndUploadFile(file.name,file.path)  
@@ -134,30 +132,15 @@ class DBService{
         const db=await this.createConnection();
         try{
             const sql=`SELECT * FROM files f where id= ?`;
-            const realFiles=Filer.readAllFromMCD_DIR();
+            const realFiles=FileService.readAllFromMCD_DIR();
             for(let realfile of realFiles){
                 let id=realfile.id;
                 let mtime=new Date(realfile.updated_at).toISOString();
                 const result=await db.get(sql,[id]);
                 let FileTableMtime=new Date(result.updated_at).toISOString();
-                /*
                 if(FileTableMtime!=mtime){
-                    GdriveService.downloadFile(result.gdrive_id,result.id);
-                    if(FileService.verifyIfFileExists(result.id)){
-                        let Sync=FileService.verifySyncFile(result.id,result.name);
-                        if(!Sync){
-                            await GdriveService.createAndUploadFile(result.name,result.path,(err,fileId)=>{
-                                if(err){
-                                    LogService.error(`CompareMtimeWithFileTable`);
-                                } else{
-                                    DBService.updateGdriveId({id:result.id,gdrive_id:fileId});
-                                    DBService.updateMtime(result.id,mtime);
-                                }
-                            })
-                            await GdriveService.deleteFile(result.gdrive_id);
-                        }
-                    }
-                }*/
+                    await FileService.SyncFile(result.id,result.name,result.gdrive_id,mtime)
+                }
             }
             await db.close()   
         }
