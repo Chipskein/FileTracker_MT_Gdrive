@@ -66,8 +66,8 @@ class BusServices{
         const files_mtime_corruped=[];
         const filesUpdated=[];
         for(let file of files){
-            await GDS.downloadFile(gdrive_id,fileId);
-            let GdriveFilePath=defaultPath+fileId;
+            await GDS.downloadFile(file.gdrive_id,file.id);
+            let GdriveFilePath=defaultPath+file.id;
             let RealFilePath=process.env.MCD_DIR+realFileName;
             let GdriveFile_EQ_RealFile=this.CompareFilesBufferByPath(GdriveFilePath,RealFilePath)
             if(!GdriveFile_EQ_RealFile){
