@@ -1,7 +1,4 @@
-fix async/await calls []
-fix callbacks []
 refactor []
-
 implement automated tests []
 create bash script to configure crontab(run each time system starts) []
 verify if has internet if not,stand by until has connection []

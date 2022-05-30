@@ -3,20 +3,19 @@ const success=colors.green;
 const warning=colors.yellow;
 const error=colors.red;
 
-const LogService={
-    log:(txt)=>{
+class LogService{
+    log(txt){
         console.log(`[${new Date().toISOString()}]:::: ${txt}`);
-    },
-    success:(txt)=>{
+    }
+    success(txt){
         console.log(success(`[${new Date().toISOString()}]:::: ${txt}::SUCCESS`));
-    },
-    error:(txt)=>{
+    }
+    error(txt){
         console.log(error(`[${new Date().toISOString()}]:::: ${txt}::ERROR`));
         process.exit();
-    },
-    warning:(txt)=>{
+    }
+    warning(txt){
         console.log(warning(`[${new Date().toISOString()}]:::: ${txt}::ATTENTION`));
     }
-    
 }
 module.exports=LogService
