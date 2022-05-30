@@ -127,7 +127,7 @@ class DBService{
                 const result=await db.get(sql,[id]);
                 let FileTableMtime=new Date(result.updated_at).toISOString();
                 if(FileTableMtime!=mtime) {
-                    result.mtime=mtime;
+                    result.mtime=realfile.updated_at;
                     modified_files.push(result);
                 }
             }
