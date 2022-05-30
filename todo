@@ -1,2 +1,6 @@
 implement automated tests []
-create bash script to configure installation []
+create shell script to configure installation []
+implement tracking of multiple directories []
+test with big files []
+
+
