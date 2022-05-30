@@ -1,4 +1,3 @@
-fix circular dependencies []
 refactor []
 implement automated tests []
 create bash script to configure crontab(run each time system starts) []
