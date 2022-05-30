@@ -1,9 +1,6 @@
 const { google }=require("googleapis");
 const path=require('path');
 
-const LogService=require('./logservice');
-const Logger=new LogService();
-
 class GdriveService{
     constructor(){
          this.KEY_PATH=`${path.resolve()}/src/tmp/tmpcredentials.json`;
@@ -31,7 +28,7 @@ class GdriveService{
         return files;
     }
     async downloadFile(fileId,filename){
-        Logger.warning(`Downloading${filename}`);
+        //Logger.warning(`Downloading${filename}`);
         const dest = Filer.createWriteStream(filename);
         const drive = google.drive({version: 'v3', auth:this.auth});
         const { data }=await drive.files.get({fileId: fileId, alt: "media"},{responseType: "stream"})        

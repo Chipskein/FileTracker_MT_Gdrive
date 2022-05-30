@@ -4,13 +4,6 @@ const hash=require('sha256');
 
 const defaultPath=`${path.resolve()}/src/tmp/`;
 
-const GdriveService=require('./gdriveservice');
-const LogService = require('./logservice');
-const DBService = require('./dbservice');
-
-const Logger=new LogService();
-const DBER=new DBService();
-
 class FileService{
     async loadEnviroment(envfile_name='.env'){
         const dotenv=require('dotenv');
@@ -89,11 +82,13 @@ class FileService{
         let RealFilePath=process.env.MCD_DIR+realFileName;
         let GdriveFile_EQ_RealFile=this.CompareFilesBufferByPath(GdriveFilePath,RealFilePath)
         if(!GdriveFile_EQ_RealFile){
-            const { id } = await Gdriver.createAndUploadFile(realFileName,RealFilePath)
-            await DBER.updateGdriveId({id:fileId,gdrive_id:id});
-            await DBER.updateMtime(fileId,mtime);
-            await Gdriver.deleteFile(gdrive_id);
-            Logger.success(fileId+"mtime fixed");
+            /*
+                const { id } = await Gdriver.createAndUploadFile(realFileName,RealFilePath)
+                await DBER.updateGdriveId({id:fileId,gdrive_id:id});
+                await DBER.updateMtime(fileId,mtime);
+                await Gdriver.deleteFile(gdrive_id);
+                Logger.success(fileId+"mtime fixed");
+            */
         }
         else{
             Logger.warning('They are the same file but mtime has been changed');

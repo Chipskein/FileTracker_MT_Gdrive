@@ -4,17 +4,17 @@ const warning=colors.yellow;
 const error=colors.red;
 
 class LogService{
-    log(txt){
+    static log(txt){
         console.log(`[${new Date().toISOString()}]:::: ${txt}`);
     }
-    success(txt){
+    static success(txt){
         console.log(success(`[${new Date().toISOString()}]:::: ${txt}::SUCCESS`));
     }
-    error(txt){
+    static error(txt){
         console.log(error(`[${new Date().toISOString()}]:::: ${txt}::ERROR`));
         process.exit();
     }
-    warning(txt){
+    static warning(txt){
         console.log(warning(`[${new Date().toISOString()}]:::: ${txt}::ATTENTION`));
     }
 }

@@ -1,12 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const sqlite=require('sqlite');
 const path=require('path');
-
-const GdriveService=require('./gdriveservice');
-const FileService = require('./fileservice');
 const LogService = require('./logservice');
-
-const Logger=new LogService();
 
 class DBService{
     constructor(){
@@ -28,11 +23,10 @@ class DBService{
         const db=await this.createConnection();
         const result=await db.get('SELECT name FROM sqlite_master WHERE type= ? AND name= ? ',['table','files'])
         await db.close();
-        if (result&&result.name) Logger.success("Table files exists!");
-        else await this.createTableFiles();
+        if (result&&result.name) return true;
+        else return await this.createTableFiles();
     }
     async createTableFiles(){
-        Logger.warning("Creating files table");
         const db=await this.createConnection();
         try{
             const sql=`
@@ -49,10 +43,11 @@ class DBService{
             `;
             await this.db.run(sql);
             await db.close();
+            return true;
         }
         catch(error){
             await db.close();
-            Logger.error(error);
+            return false;
         }
     }
     async getFilesSummaryById(hashid,callback){
@@ -65,11 +60,10 @@ class DBService{
             };
         })
     }
-    async insertInFilesIfNotExists(){
+    async insertInFilesIfNotExists(files){
         const db=await this.createConnection();
         try{
             await db.run("begin transaction");
-            const files=FileService.readAllFromMCD_DIR();
             const Prepquery=await db.prepare('INSERT OR IGNORE INTO files(id,name,description,extension,updated_at,path) VALUES (?,?,?,?,?,?)');
             for(let file of files){
                 await Prepquery.run(file.id,file.name,file.description,file.extension,file.updated_at,file.filepath);
@@ -80,40 +74,34 @@ class DBService{
         }
         catch(error){
             await db.close();
-            Logger.error(error);
+            LogService.error(error);
         }
     }
-    async VerifyAllWithOutGdriveId(){
-        Logger.warning(`Verify GDRIVE ID in Files`);
+    async VerifyUntrackedFiles(){
+        LogService.warning(`Verify Untrackeed files `);
         const db=await this.createConnection();
         try{
             const sql=`SELECT * FROM files f where f.gdrive_id is null;`;
             const result=await db.all(sql)
-            const Gdriver=new GdriveService()
-            if(result.length>0){
-                for(let file of result){
-                    const { id }=await Gdriver.createAndUploadFile(file.name,file.path)  
-                    await this.updateGdriveId({id:file.id,gdrive_id:id});
-                }
-            }
-            Logger.success(`Verify GDRIVE ID in Files`);
             await db.close();
+            if(result.length>0) return result;
+            else false;
         }
         catch(error){
             await db.close();
-            Logger.error(error);
+            LogService.error(error);
         }
     }
     async updateGdriveId(file){
         const db=await this.createConnection();
         try{
             await db.run(`UPDATE files SET gdrive_id = ? WHERE id = ?`,[file.gdrive_id,file.id])
-            Logger.success(file.id+'updated');
+            LogService.success(file.id+'updated');
             await db.close()
         }
         catch(error){
             await db.close();
-            Logger.error(error);
+            LogService.error(error);
         }
     }
     async updateMtime(id,mtime){
@@ -121,32 +109,34 @@ class DBService{
         try{
             await db.run(`UPDATE files SET updated_at = ? WHERE id = ?`,[mtime,id]);
             await db.close();
-            Logger.success(id+' Updated');
+            LogService.success(id+' Updated');
         }
         catch(error){
             await db.close();
-            Logger(error);
+            LogService(error);
         }
     }
-    async CompareMtimeWithFileTable(){
+    async CompareMtimeWithFileTable(realFiles){
         const db=await this.createConnection();
         try{
             const sql=`SELECT * FROM files f where id= ?`;
-            const realFiles=FileService.readAllFromMCD_DIR();
+            const modified_files=[];
             for(let realfile of realFiles){
                 let id=realfile.id;
                 let mtime=new Date(realfile.updated_at).toISOString();
                 const result=await db.get(sql,[id]);
                 let FileTableMtime=new Date(result.updated_at).toISOString();
-                if(FileTableMtime!=mtime){
-                    await FileService.SyncFile(result.id,result.name,result.gdrive_id,mtime)
+                if(FileTableMtime!=mtime) {
+                    result.mtime=mtime;
+                    modified_files.push(result);
                 }
             }
-            await db.close()   
+            await db.close();
+            return modified_files;
         }
         catch(error){
             await db.close()
-            Logger.error(error);
+            LogService.error(error);
         }
     }
 }
