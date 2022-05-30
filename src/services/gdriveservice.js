@@ -1,6 +1,10 @@
 const { google }=require("googleapis");
 const path=require('path');
 
+const FileService = require("./fileservice");
+const LogService=require('./logservice');
+const FS=new FileService();
+
 class GdriveService{
     constructor(){
          this.KEY_PATH=`${path.resolve()}/src/tmp/tmpcredentials.json`;
@@ -14,7 +18,7 @@ class GdriveService{
         const driveService = google.drive({version: 'v3', auth:this.auth});
         const FOLDER= process.env.GDRIVE_FOLDER;
         let fileMetaData = {'name': fileName,'parents': [FOLDER]};
-        let media = {mimeType: "*/*",body: FileService.createReadStreamFromFile(filePath)};
+        let media = {mimeType: "*/*",body: FS.createReadStreamFromFile(filePath)};
         let options={resource: fileMetaData,media: media,fields: 'id'};          
         const { data } =await driveService.files.create(options);
         return data;
@@ -28,16 +32,16 @@ class GdriveService{
         return files;
     }
     async downloadFile(fileId,filename){
-        //Logger.warning(`Downloading${filename}`);
-        const dest = Filer.createWriteStream(filename);
+        LogService.warning(`Downloading ${filename}`);
+        const dest = FS.createWriteStream(filename);
         const drive = google.drive({version: 'v3', auth:this.auth});
         const { data }=await drive.files.get({fileId: fileId, alt: "media"},{responseType: "stream"})        
         data.pipe(dest);
     }
     async deleteFile(id){
+        LogService.warning(`Deleting ${id} from Gdrive`);
         const drive = google.drive({version: 'v3', auth:this.auth});
-        const response=await drive.files.delete({fileId: id,});
-        console.log(response);
+        await drive.files.delete({fileId: id,});
     }
 };
 

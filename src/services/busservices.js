@@ -4,7 +4,8 @@ const FileService = require("./fileservice")
 const DBService = require("./dbservice")
 const TestService=require('./testservices');
 const NetworkServices = require("./networkservice");
-
+const path=require('path');
+const defaultPath=`${path.resolve()}/src/tmp/`;
 class BusServices{
     async start(){
         LogService.warning('Starting Program');
@@ -68,14 +69,15 @@ class BusServices{
         for(let file of files){
             await GDS.downloadFile(file.gdrive_id,file.id);
             let GdriveFilePath=defaultPath+file.id;
-            let RealFilePath=process.env.MCD_DIR+realFileName;
-            let GdriveFile_EQ_RealFile=this.CompareFilesBufferByPath(GdriveFilePath,RealFilePath)
+            let RealFilePath=process.env.MCD_DIR+file.name;
+            let GdriveFile_EQ_RealFile=FS.CompareFilesBufferByPath(GdriveFilePath,RealFilePath)
             if(!GdriveFile_EQ_RealFile){
-                const { id } = await GDS.createAndUploadFile(realFileName,RealFilePath)
-                await DBS.updateGdriveId({id:file.id,gdrive_id:file.gdrive_id});
+                const { id } = await GDS.createAndUploadFile(file.name,RealFilePath)
+                await DBS.updateGdriveId({id:file.id,gdrive_id:id});
                 await DBS.updateMtime(file.id,file.mtime);
                 await GDS.deleteFile(file.gdrive_id);
-                Logger.success(file.name+"Has been updated");
+                LogService.success(file.name+" Has been updated");
+                filesUpdated.push(file);
             }
             else{
                 files_mtime_corruped.push(file);

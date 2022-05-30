@@ -96,7 +96,7 @@ class DBService{
         const db=await this.createConnection();
         try{
             await db.run(`UPDATE files SET gdrive_id = ? WHERE id = ?`,[file.gdrive_id,file.id])
-            LogService.success(file.id+'updated');
+            LogService.success(file.id+' Updated');
             await db.close()
         }
         catch(error){
