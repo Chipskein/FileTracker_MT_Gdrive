@@ -9,5 +9,7 @@ where:
  * CREDENTIALS_JSON => Credentials from your Service Account
  * GDRIVE_FOLDER => Gdrive folder id,this folder need be shared with your Service Account 
 ### Run
+    npm install
+    
     node src/index.js
 
