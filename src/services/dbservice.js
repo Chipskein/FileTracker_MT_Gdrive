@@ -78,7 +78,7 @@ class DBService{
         }
     }
     async VerifyUntrackedFiles(){
-        LogService.warning(`Verify Untrackeed files `);
+        LogService.warning(`Verify Untracked files `);
         const db=await this.createConnection();
         try{
             const sql=`SELECT * FROM files f where f.gdrive_id is null;`;

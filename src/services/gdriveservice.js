@@ -1,5 +1,6 @@
 const { google }=require("googleapis");
 const path=require('path');
+const mimeType=require('mime-types');
 
 const FileService = require("./fileservice");
 const LogService=require('./logservice');
@@ -18,7 +19,7 @@ class GdriveService{
         const driveService = google.drive({version: 'v3', auth:this.auth});
         const FOLDER= process.env.GDRIVE_FOLDER;
         let fileMetaData = {'name': fileName,'parents': [FOLDER]};
-        let media = {mimeType: "*/*",body: FS.createReadStreamFromFile(filePath)};
+        let media = {mimeType:mimeType.lookup(filePath),body: FS.createReadStreamFromFile(filePath)};
         let options={resource: fileMetaData,media: media,fields: 'id'};          
         const { data } =await driveService.files.create(options);
         return data;

@@ -1,5 +1,6 @@
 node_modules
 .env
+.env.test
 src/database/*
 !src/database/.gitkeep
 src/tmp/*

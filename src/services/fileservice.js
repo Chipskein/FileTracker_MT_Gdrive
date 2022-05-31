@@ -58,17 +58,20 @@ class FileService{
     }
     readAllFromMCD_DIR(){
         const MCD_DIR=process.env.MCD_DIR;
-        const files=fs.readdirSync(MCD_DIR);
+        const files=fs.readdirSync(MCD_DIR,{ withFileTypes: true });
         const response=[];
-        for (let filename of files) {
-            const extension = path.extname(MCD_DIR+filename);
-            const stats=fs.statSync(MCD_DIR+filename);
-            const updated_at=stats.mtime;
-            const filesize = stats.size;
-            const id=hash(filename);
-            const description='duckstation memory card file'
-            const filepath=MCD_DIR+filename;
-            response.push({id,name: filename, extension,description,filesize,updated_at,filepath});
+        for (let file of files) {
+            if(file.isFile()){
+                const filename=file.name;
+                const extension = path.extname(MCD_DIR+filename);
+                const stats=fs.statSync(MCD_DIR+filename);
+                const updated_at=stats.mtime;
+                const filesize = stats.size;
+                const id=hash(filename);
+                const description='duckstation memory card file'
+                const filepath=MCD_DIR+filename;
+                response.push({id,name: filename, extension,description,filesize,updated_at,filepath});
+            }
         }
         return response;
     }

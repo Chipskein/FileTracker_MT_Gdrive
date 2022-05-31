@@ -1,4 +1,4 @@
-const BusServices =require('./services/busservices.js');
-const Service=new BusServices();
+const BusService =require('./services/busservice.js');
+const Service=new BusService();
 (async ()=>{await Service.start()})();
 

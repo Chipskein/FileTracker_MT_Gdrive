@@ -2,7 +2,7 @@ const LogService = require("./logservice")
 const GdriveService = require("./gdriveservice");
 const FileService = require("./fileservice")
 const DBService = require("./dbservice")
-const TestService=require('./testservices');
+const TestService=require('./testservice');
 const NetworkServices = require("./networkservice");
 const path=require('path');
 const defaultPath=`${path.resolve()}/src/tmp/`;
@@ -30,7 +30,7 @@ class BusServices{
     async prepareEnv(){
         const FS=new FileService();
         LogService.log('Loading Enviroment');
-        await FS.loadEnviroment();
+        await FS.loadEnviroment('.env.test');
     }
     async TrackNewFiles(){
         LogService.log(`Track files from ${process.env.MCD_DIR}`);
