@@ -10,8 +10,7 @@ class BusServices{
     async start(){
         LogService.warning('Starting Program');
 
-    
-        await this.awaitForConnection();    
+
         await this.prepareEnv();
         await this.runTests();
 
@@ -100,15 +99,6 @@ class BusServices{
         await this.prepareShutdown();
         LogService.warning('Shutdown Programm');
         process.exit();
-    }
-    async awaitForConnection(){
-        const NS=new NetworkServices();
-        let isOnline=await NS.isOnline();
-        while(!isOnline){
-            LogService.warning("Trying to connect to internet...");
-            isOnline=await NS.isOnline();
-        }
-        LogService.success("Trying to connect to internet");
     }
 }
 module.exports=BusServices
